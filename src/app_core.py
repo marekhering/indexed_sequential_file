@@ -1,5 +1,5 @@
 from .file_structures import *
-from setup import INDEXES_DIR, PRIMARY_AREA_DIR, OVERFLOW_AREA_DIR
+from src.setup import INDEXES_DIR, PRIMARY_AREA_DIR, OVERFLOW_AREA_DIR
 
 
 class AppCore:
@@ -7,4 +7,9 @@ class AppCore:
         self.index_file = IndexFile(INDEXES_DIR)
         self.primary_area = PrimaryAreaFile(PRIMARY_AREA_DIR)
         self.overflow_area = OverflowAreaFile(OVERFLOW_AREA_DIR)
+
+    def read_record(self, key):
+        page_number = self.index_file.find_page_number(key)
+        print(page_number)
+
 

@@ -1,11 +1,11 @@
 
 class Index:
-    def __init__(self, key, page_offset):
+    def __init__(self, key, page_number):
         self.key = key
-        self.page_offset = page_offset
+        self.page_number = page_number
 
     def get_key(self):
         return self.key
 
-    def get_page_offset(self):
-        return self.page_offset
+    def get_page_number(self):
+        return self.page_number

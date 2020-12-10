@@ -16,7 +16,7 @@ def bisection(key, key_list, first_lower=False):
 
         if a == x:
             if first_lower:
-                return key_list[x]
+                return x
             else:
                 return None
 

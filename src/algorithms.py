@@ -1,5 +1,5 @@
 
-def bisection(key, key_list, first_lower=False):
+def bisection(key, key_list, return_first_lower=False):
 
     a = 0
     b = len(key_list) - 1
@@ -15,7 +15,7 @@ def bisection(key, key_list, first_lower=False):
         x = int((a + b) / 2)
 
         if a == x:
-            if first_lower:
+            if return_first_lower:
                 return x
             else:
                 return None

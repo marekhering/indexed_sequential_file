@@ -1,6 +1,6 @@
 from .file_class import FileClass
 from src.algorithms import bisection
-from src.index import Index
+from src.file_structures.elements.index import Index
 
 
 class IndexFile(FileClass):

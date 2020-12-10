@@ -10,6 +10,6 @@ class AppCore:
 
     def read_record(self, key):
         page_number = self.index_file.find_page_number(key)
-        print(page_number)
+        
 
 

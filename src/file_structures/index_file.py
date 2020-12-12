@@ -1,6 +1,7 @@
 from .file_class import FileClass
 from src.algorithms import bisection
 from src.file_structures.elements.index import Index
+from src.setup import *
 
 
 class IndexFile(FileClass):
@@ -10,22 +11,26 @@ class IndexFile(FileClass):
 
     def find_page_number(self, key):
         _, index = bisection(key, self.get_index_keys())
-        start_page_number = int(self.indexes[index].get_page_number())
-        if index != len(self.indexes) - 1:
-            end_page_number = int(self.indexes[index + 1].get_page_number())
-        else:
-            end_page_number = 'EOF'
-        return start_page_number, end_page_number
+        page_number = self.indexes[index].get_page_number()
+        return page_number
 
     def get_index_keys(self):
         return [index.get_key() for index in self.indexes]
 
     @staticmethod
     def read_index_file(file_directory):
+        index_list = list()
         with open(file_directory, 'r') as file:
-            index_list = list()
             for line in file.readlines():
                 words = line.split(' ')
                 index = Index(words[0], words[1][:-1])
                 index_list.append(index)
-            return index_list
+
+        if not index_list:
+            key = '0' * KEY_SIZE
+            page_number = '0' * PAGE_NUMBER_SIZE
+            zero_index = Index(key, page_number)
+            index_list.append(zero_index)
+
+        return index_list
+

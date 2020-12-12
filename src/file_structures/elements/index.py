@@ -2,7 +2,7 @@
 class Index:
     def __init__(self, key, page_number):
         self.key = key
-        self.page_number = page_number
+        self.page_number = int(page_number)
 
     def get_key(self):
         return self.key

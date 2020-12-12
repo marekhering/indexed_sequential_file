@@ -7,7 +7,7 @@ class OverflowAreaFile(RecordFile):
         super().__init__(file_directory)
 
     def read_record(self, record_line_number):
-        offset = (record_line_number - 1) * self.LINE_SIZE
+        offset = (record_line_number - 1) * (self.LINE_SIZE + 1)
         with open(self.file_directory, 'r') as file:
             file.seek(offset)
             line = file.read(self.LINE_SIZE - 1)

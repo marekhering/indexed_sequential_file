@@ -26,8 +26,14 @@ class AppCore:
 
         new_record.set_next_record_pointer(previous_record.get_next_record_pointer())
 
-        self.overflow_area.add_record(new_record)
-        previous_record_place.update_record_pointer(previous_record, self.overflow_area.size_in_lines)
+        place_in_primary_area = False
+        if previous_record_place == self.primary_area:
+            place_in_primary_area = self.primary_area.add_record(new_record, previous_record)
+
+        if not place_in_primary_area:
+            self.overflow_area.add_record(new_record)
+            previous_record_place.update_record_pointer(previous_record, self.overflow_area.size_in_lines - 1)
+
         return True
 
     def find_record_in_files(self, key):
@@ -37,8 +43,8 @@ class AppCore:
             'place': None
         }
 
-        start_page_number, end_page_number = self.index_file.find_page_number(key)
-        result, record_from_primary = self.primary_area.find_record(key, start_page_number, end_page_number)
+        page_number = self.index_file.find_page_number(key)
+        result, record_from_primary = self.primary_area.find_record(key, page_number)
         if result is True:
             result_dict['record'] = record_from_primary
             result_dict['found'] = True

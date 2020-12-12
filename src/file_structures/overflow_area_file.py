@@ -7,12 +7,16 @@ class OverflowAreaFile(RecordFile):
         super().__init__(file_directory)
 
     def read_record(self, record_line_number):
-        offset = (record_line_number - 1) * (self.LINE_SIZE + 1)
-        with open(self.file_directory, 'r') as file:
-            file.seek(offset)
-            line = file.read(self.LINE_SIZE - 1)
+        result = False
+        record = None
+        if self.last_block is not None:
+            result, record = self.last_block.find_in_line(record_line_number)
 
-        record = Record.from_string(line, line_number=record_line_number)
+        if not result:
+            page_number = int(record_line_number / self.LINE_SIZE)
+            self.read_block(page_number)
+            result, record = self.last_block.find_in_line(record_line_number)
+
         return record
 
     def add_record(self, record):

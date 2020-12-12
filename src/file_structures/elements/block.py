@@ -21,8 +21,19 @@ class Block(list):
         else:
             return False
 
+    def find_in_line(self, line_number):
+        if not self.if_line_buffered(line_number):
+            return False, None
+
+        index = line_number - self.first_line_number
+        return True, self[index]
+
     def get_records(self):
         return [record for record in self if record is not None]
+
+    def if_line_buffered(self, line_number):
+        result = True if self.first_line_number <= line_number < self.first_line_number + len(self) else False
+        return result
 
     @staticmethod
     def from_string(block_as_string, first_line_number, blank_line):

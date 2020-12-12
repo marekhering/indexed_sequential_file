@@ -1,27 +1,27 @@
 
-def bisection(key, key_list, return_first_lower=False):
+def bisection(key, key_list):
 
     a = 0
     b = len(key_list) - 1
 
     if key_list[a] == key:
-        return a
+        return True, a
 
     if key_list[b] == key:
-        return b
+        return True, b
+
+    if key_list[b] < key:
+        return False, b
 
     while True:
 
         x = int((a + b) / 2)
 
         if a == x:
-            if return_first_lower:
-                return x
-            else:
-                return None
+            return False, x
 
         if key_list[x] == key:
-            return x
+            return True, x
         elif key_list[x] > key:
             b = x
         else:

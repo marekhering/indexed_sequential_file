@@ -17,6 +17,13 @@ class IndexFile(FileClass):
     def get_index_keys(self):
         return [index.get_key() for index in self.indexes]
 
+    def print_all(self):
+        print("Index file")
+        print("Key    PageNumber")
+        for index in self.indexes:
+            print(index.to_string())
+        print()
+
     @staticmethod
     def read_index_file(file_directory):
         index_list = list()

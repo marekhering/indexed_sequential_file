@@ -6,22 +6,13 @@ class OverflowAreaFile(RecordFile):
     def __init__(self, file_directory):
         super().__init__(file_directory)
 
-    def read_record(self, record_line_number):
-        result = False
-        record = None
-        if self.last_block is not None:
-            result, record = self.last_block.find_in_line(record_line_number)
-
-        if not result:
-            page_number = int(record_line_number / self.LINE_SIZE)
+    def add_record(self, record, previous_record):
+        save_line = self.size_in_lines
+        if self.block is None or not self.block.if_line_buffered(save_line):
+            page_number = int(save_line / self.BLOCK_SIZE_IN_LINES)
             self.read_block(page_number)
-            result, record = self.last_block.find_in_line(record_line_number)
-
-        return record
-
-    def add_record(self, record):
-        with open(self.file_directory, 'a') as file:
-            file.write(record.to_string())
+        record.set_line_number(save_line)
+        self.block.append(record)
         self.size_in_lines += 1
 
     def find_record(self, key, starting_record):
@@ -39,3 +30,7 @@ class OverflowAreaFile(RecordFile):
 
             if processing_record.key == key:
                 return True, processing_record
+
+    def print_all(self):
+        print("Overflow area")
+        super(OverflowAreaFile, self).print_all()

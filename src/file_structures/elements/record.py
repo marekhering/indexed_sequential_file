@@ -17,11 +17,14 @@ class Record:
     def get_next_record_pointer(self):
         return self.next_record_pointer
 
+    def get_line_number(self):
+        return self.line_number
+
+    def set_line_number(self, line_number):
+        self.line_number = line_number
+
     def set_next_record_pointer(self, next_record_pointer):
         self.next_record_pointer = next_record_pointer
-
-    def to_string(self):
-        return self.key + ' ' + self.get_value_as_string() + ' ' + self.get_next_record_pointer_as_string() + '\n'
 
     def get_next_record_pointer_as_string(self):
         if self.next_record_pointer is None:
@@ -31,6 +34,9 @@ class Record:
 
     def get_value_as_string(self):
         return self.fill_with(str(self.value), '0', RECORD_SIZE)
+
+    def to_string(self):
+        return self.key + ' ' + self.get_value_as_string() + ' ' + self.get_next_record_pointer_as_string() + '\n'
 
     @staticmethod
     def from_string(line, line_number=None):

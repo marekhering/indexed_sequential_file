@@ -1,5 +1,6 @@
 from .file_structures import *
-from src.setup import INDEXES_DIR, PRIMARY_AREA_DIR, OVERFLOW_AREA_DIR
+from .file_structures.elements import Record
+from src.setup import INDEXES_DIR, PRIMARY_AREA_DIR, OVERFLOW_AREA_DIR, FORCE_SAVE
 
 
 class AppCore:
@@ -26,15 +27,64 @@ class AppCore:
 
         new_record.set_next_record_pointer(previous_record.get_next_record_pointer())
 
-        place_in_primary_area = False
+        next_record_place = self.overflow_area
         if previous_record_place == self.primary_area:
-            place_in_primary_area = self.primary_area.add_record(new_record, previous_record)
+            if self.primary_area.block.find_place_after(previous_record):
+                next_record_place = self.primary_area
 
-        if not place_in_primary_area:
-            self.overflow_area.add_record(new_record)
+        next_record_place.add_record(new_record, previous_record)
+
+        if next_record_place == self.overflow_area:
             previous_record_place.update_record_pointer(previous_record, self.overflow_area.size_in_lines - 1)
 
+        if FORCE_SAVE and (next_record_place == self.overflow_area or previous_record_place == self.overflow_area):
+            self.overflow_area.save_block()
+
+        if FORCE_SAVE and (next_record_place == self.primary_area or previous_record_place == self.primary_area):
+            self.primary_area.save_block()
+
         return True
+
+    def print_flies(self):
+        self.index_file.print_all()
+        self.primary_area.print_all()
+        self.overflow_area.print_all()
+
+    def browse(self):
+
+        starting_key = self.index_file.indexes[0].key
+        result_dict = self.find_record_in_files(starting_key)
+        start_record = result_dict['record']
+        base_primary_line = 0
+        found_in_primary_area = True
+        print("Line  Key  Value  Pointer  Area")
+        while True:
+            place_name = "PrimaryArea" if found_in_primary_area else "OverflowArea"
+            print(str(start_record.get_number_of_lines()) + ' ' + start_record.to_string()[:-1] + ' ' + place_name)
+
+            next_record, found_in_primary_area = self.find_next_record(start_record, base_primary_line)
+            if found_in_primary_area:
+                base_primary_line = next_record.get_line_number()
+            if next_record is None:
+                break
+            start_record = next_record
+        print()
+
+    def find_next_record(self, previous_record, base_primary_line):
+        pointer = previous_record.get_next_record_pointer()
+        if pointer is not None:
+            record = self.overflow_area.read_record(pointer)
+            return record, False
+
+        next_line = base_primary_line
+        while True:
+            next_line = next_line + 1
+            if next_line >= self.primary_area.size_in_lines:
+                return None, False
+
+            record = self.primary_area.read_record(next_line)
+            if record is not None:
+                return record, True
 
     def find_record_in_files(self, key):
         result_dict = {

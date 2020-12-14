@@ -16,10 +16,11 @@ class Interface:
             print("Options:")
             print("1. Read record")
             print("2. Insert record")
-            print("3. Browse")
-            print("4. Load test")
-            # print("5. Clear input file")
-            # print("6. Set new input file (" + self.input_directory + ")")
+            print("3. Remove record")
+            print("4. Update record")
+            print("5. Browse")
+            print("6. Reorganize")
+            print("7. Load test")
             print("0. Exit")
             print("Select an option number: ", end='')
 
@@ -32,17 +33,16 @@ class Interface:
             elif choice == '2':
                 self.insert_record()
             elif choice == '3':
+                self.remove_record()
+            elif choice == '5':
                 self.browse()
-            elif choice == '4':
+            elif choice == '6':
+                self.reorganize()
+            elif choice == '7':
                 self.load_test()
-            # elif choice == '5':
-            #     clear_file(self.input_directory)
-            #     print("Input file cleared")
-            #     print()
-            # elif choice == '6':
-            #     self.set_new_directory()
-            # elif choice == '0':
-            #     break
+            elif choice == '0':
+                self.app_core.save_all()
+                break
             else:
                 print("Wrong option")
                 print()
@@ -65,6 +65,35 @@ class Interface:
             print("Record inserted")
         else:
             print("Record already exist")
+        print()
+
+    def remove_record(self):
+        key = self.insert_key()
+        result = self.app_core.remove_record(key)
+        if result:
+            print("Record removed")
+        else:
+            print("No record with given key")
+        print()
+
+    def browse(self):
+        print("Browse option: ")
+        print("1. Print records in files")
+        print("2. Print records as chain")
+        print("Enter browse option: ", end='')
+        option = input()
+        print()
+        if option == '1':
+            self.app_core.print_flies()
+        elif option == '2':
+            self.app_core.browse()
+        else:
+            print("Wrong option")
+            print()
+
+    def reorganize(self):
+        self.app_core.reorganize()
+        print("File reorganized")
         print()
 
     def load_test(self):
@@ -96,21 +125,6 @@ class Interface:
                         print("Record already exist")
 
         print()
-
-    def browse(self):
-        print("Browse option: ")
-        print("1. Print records in files")
-        print("2. Print records as chain")
-        print("Enter browse option: ", end='')
-        option = input()
-        print()
-        if option == '1':
-            self.app_core.print_flies()
-        elif option == '2':
-            self.app_core.browse()
-        else:
-            print("Wrong option")
-            print()
 
     @staticmethod
     def insert_key():

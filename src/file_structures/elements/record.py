@@ -2,9 +2,10 @@ from src.setup import *
 
 
 class Record:
-    def __init__(self, key, value, next_record_pointer=None, line_number=None):
+    def __init__(self, key, value, next_record_pointer=None, remove_flag=0, line_number=None):
         self.key = key
         self.value = value
+        self.remove_flag = remove_flag
         self.next_record_pointer = next_record_pointer
         self.line_number = line_number
 
@@ -26,6 +27,9 @@ class Record:
     def set_next_record_pointer(self, next_record_pointer):
         self.next_record_pointer = next_record_pointer
 
+    def set_remove_flag(self):
+        self.remove_flag = 1
+
     def get_next_record_pointer_as_string(self):
         if self.next_record_pointer is None:
             return self.fill_with("", '-', OVERFLOW_POINTER_SIZE)
@@ -36,7 +40,12 @@ class Record:
         return self.fill_with(str(self.value), '0', RECORD_SIZE)
 
     def to_string(self):
-        return self.key + ' ' + self.get_value_as_string() + ' ' + self.get_next_record_pointer_as_string() + '\n'
+        return self.key + ' ' + self.get_value_as_string() + ' ' + self.get_next_record_pointer_as_string() \
+               + ' ' + str(self.remove_flag) + '\n'
+
+    def copy(self):
+        new_record = Record(self.key, self.value, self.next_record_pointer, self.remove_flag, self.line_number)
+        return new_record
 
     @staticmethod
     def from_string(line, line_number=None):
@@ -52,7 +61,9 @@ class Record:
         else:
             overflow_pointer = int(words[2])
 
-        record = Record(key, value, overflow_pointer, line_number)
+        remove_flag = int(words[3])
+
+        record = Record(key, value, overflow_pointer, remove_flag, line_number)
         return record
 
     @staticmethod

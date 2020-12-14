@@ -15,6 +15,8 @@ class Block(list):
         keys = [record.get_key() for record in records]
         result, index = bisection(key, keys)
         record = records[index]
+        if record.remove_flag == 1:
+            result = False
         return result, record
 
     def find_place_after(self, record):
@@ -33,7 +35,7 @@ class Block(list):
         self[index] = record
 
     def append(self, record):
-        if len(self) >= self.max_size:
+        if self.is_full():
             print("Cannot append")
             return
         super(Block, self).append(record)
@@ -42,14 +44,23 @@ class Block(list):
         index = line_number - self.first_line_number
         self[index].set_next_record_pointer(new_pointer)
 
+    def update_remove_flag(self, line_number):
+        index = line_number - self.first_line_number
+        self[index].set_remove_flag()
+
     def get_records(self):
         return [record for record in self if record is not None]
 
-    def if_line_buffered(self, line_number):
+    def if_line_buffered(self, line_number, check_length=True):
         result = True if self.first_line_number <= line_number < self.first_line_number + self.max_size else False
-        if line_number >= self.first_line_number + len(self):
+        if check_length and line_number >= self.first_line_number + len(self):
             result = False
         return result
+
+    def is_full(self):
+        if len(self) >= self.max_size:
+            return True
+        return False
 
     def to_string(self, blank_line):
         block_as_string = ""

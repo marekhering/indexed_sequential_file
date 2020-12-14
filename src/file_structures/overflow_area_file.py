@@ -8,7 +8,7 @@ class OverflowAreaFile(RecordFile):
 
     def add_record(self, record, previous_record):
         save_line = self.size_in_lines
-        if self.block is None or not self.block.if_line_buffered(save_line):
+        if self.block is None or not self.block.if_line_buffered(save_line, check_length=False):
             page_number = int(save_line / self.BLOCK_SIZE_IN_LINES)
             self.read_block(page_number)
         record.set_line_number(save_line)
@@ -25,7 +25,7 @@ class OverflowAreaFile(RecordFile):
             previous_record = processing_record
             processing_record = self.read_record(pointer)
 
-            if processing_record.key > key:
+            if processing_record.key > key or processing_record.remove_flag == 1:
                 return False, previous_record
 
             if processing_record.key == key:

@@ -5,6 +5,10 @@ from src.setup import *
 
 
 class IndexFile(FileClass):
+    LINE_SIZE = KEY_SIZE + len(' ') + PAGE_NUMBER_SIZE + len('\n')
+    BLOCK_SIZE_IN_LINES = int(BLOCK_SIZE / LINE_SIZE)
+    BLANK_LINE = '-' * (LINE_SIZE - 1)
+
     def __init__(self, file_directory):
         super().__init__(file_directory)
         self.indexes = IndexFile.read_index_file(file_directory)
@@ -19,9 +23,9 @@ class IndexFile(FileClass):
 
     def print_all(self):
         print("Index file")
-        print("Key    PageNumber")
+        print("Key  PageNumber")
         for index in self.indexes:
-            print(index.to_string())
+            print(index.to_string(), end='')
         print()
 
     @staticmethod

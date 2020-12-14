@@ -6,16 +6,19 @@ class OverflowAreaFile(RecordFile):
     def __init__(self, file_directory):
         super().__init__(file_directory)
 
-    def add_record(self, record, previous_record):
+    def add_record(self, record, previous_record, counter_dict):
         save_line = self.size_in_lines
         if self.block is None or not self.block.if_line_buffered(save_line, check_length=False):
             page_number = int(save_line / self.BLOCK_SIZE_IN_LINES)
-            self.read_block(page_number)
+            saved = self.read_block(page_number)
+            counter_dict['read_number'] += 1
+            if saved:
+                counter_dict['save_number'] += 1
         record.set_line_number(save_line)
         self.block.append(record)
         self.size_in_lines += 1
 
-    def find_record(self, key, starting_record):
+    def find_record(self, key, starting_record, counter_dict):
         processing_record = starting_record
         while True:
             pointer = processing_record.get_next_record_pointer()
@@ -23,14 +26,14 @@ class OverflowAreaFile(RecordFile):
                 return False, processing_record
 
             previous_record = processing_record
-            processing_record = self.read_record(pointer)
+            processing_record = self.read_record(pointer, counter_dict)
 
-            if processing_record.key > key or processing_record.remove_flag == 1:
+            if processing_record.key > key:
                 return False, previous_record
 
-            if processing_record.key == key:
+            if processing_record.key == key and processing_record.remove_flag == 0:
                 return True, processing_record
 
-    def print_all(self):
+    def print_all(self, counter_dict):
         print("Overflow area")
-        super(OverflowAreaFile, self).print_all()
+        super(OverflowAreaFile, self).print_all(counter_dict)

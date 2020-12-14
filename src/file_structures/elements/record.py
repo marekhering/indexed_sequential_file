@@ -21,6 +21,9 @@ class Record:
     def get_line_number(self):
         return self.line_number
 
+    def set_value(self, value):
+        self.value = value
+
     def set_line_number(self, line_number):
         self.line_number = line_number
 

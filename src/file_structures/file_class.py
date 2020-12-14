@@ -19,7 +19,7 @@ class FileClass:
 
     def save_block(self, extend=False):
         if self.block is None:
-            return
+            return False
 
         if extend:
             self.block.extend([None] * (self.BLOCK_SIZE_IN_LINES - len(self.block)))
@@ -29,3 +29,4 @@ class FileClass:
             file.seek(offset)
             block_as_string = self.block.to_string(self.BLANK_LINE)
             file.write(block_as_string)
+        return True

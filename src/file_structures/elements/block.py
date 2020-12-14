@@ -9,6 +9,7 @@ class Block(list):
         super().__init__()
         self.max_size = max_size
         self.first_line_number = first_line_number
+        self.change_flag = 0
 
     def find_in_block(self, key):
         records = self.get_records()
@@ -33,20 +34,29 @@ class Block(list):
     def add_record_in_line(self, record, line_number):
         index = line_number - self.first_line_number
         self[index] = record
+        self.change_flag = 1
 
     def append(self, record):
         if self.is_full():
             print("Cannot append")
             return
         super(Block, self).append(record)
+        self.change_flag = 1
 
     def update_pointer(self, line_number, new_pointer):
         index = line_number - self.first_line_number
         self[index].set_next_record_pointer(new_pointer)
+        self.change_flag = 1
 
     def update_remove_flag(self, line_number):
         index = line_number - self.first_line_number
         self[index].set_remove_flag()
+        self.change_flag = 1
+
+    def update_value(self, line_number, value):
+        index = line_number - self.first_line_number
+        self[index].set_value(value)
+        self.change_flag = 1
 
     def get_records(self):
         return [record for record in self if record is not None]
@@ -85,5 +95,5 @@ class Block(list):
                 record = Record.from_string(line, line_number=(first_line_number + i))
 
             block.append(record)
-
+        block.change_flag = 0
         return block

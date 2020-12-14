@@ -22,52 +22,75 @@ class RecordFile(FileClass):
             block_as_string = file.read(size)
 
         new_block = Block.from_string(block_as_string, self.BLOCK_SIZE_IN_LINES, first_line_number, self.BLANK_LINE)
-        if create_if_empty and not new_block:
+        if create_if_empty and not new_block and self.size_in_lines == 0:
             record_zero = Record(Record.fill_with('0', '0', KEY_SIZE), 0, remove_flag=1, line_number=0)
             new_block.append(record_zero)
             new_block.extend([None] * (self.BLOCK_SIZE_IN_LINES - 1))
-            self.size_in_lines += self.BLOCK_SIZE_IN_LINES
+            self.size_in_lines = self.BLOCK_SIZE_IN_LINES
 
         self.read_successful = False
         if len(new_block) != 0 or self.size_in_lines == 0:
             self.read_successful = True
 
-        if self.block is not None:
+        saved = False
+        if self.block is not None and self.block.change_flag:
             self.save_block()
+            saved = True
 
         self.block = new_block
+        return saved
 
-    def update_record_pointer(self, record, new_pointer):
+    def update_record_pointer(self, record, new_pointer, counter_dict):
         if not self.block.if_line_buffered(record.line_number):
             page_number = int(record.line_number / self.BLOCK_SIZE_IN_LINES)
-            self.read_block(page_number)
+            saved = self.read_block(page_number)
+            counter_dict['read_number'] += 1
+            if saved:
+                counter_dict['save_number'] += 1
 
         self.block.update_pointer(record.line_number, new_pointer)
 
-    def update_record_remove_flag(self, record):
+    def update_record_remove_flag(self, record, counter_dict):
         if not self.block.if_line_buffered(record.line_number):
             page_number = int(record.line_number / self.BLOCK_SIZE_IN_LINES)
-            self.read_block(page_number)
-
+            saved = self.read_block(page_number)
+            counter_dict['read_number'] += 1
+            if saved:
+                counter_dict['save_number'] += 1
         self.block.update_remove_flag(record.line_number)
 
-    def read_record(self, record_line_number):
+    def update_record_value(self, record, value, counter_dict):
+        if not self.block.if_line_buffered(record.line_number):
+            page_number = int(record.line_number / self.BLOCK_SIZE_IN_LINES)
+            saved = self.read_block(page_number)
+            counter_dict['read_number'] += 1
+            if saved:
+                counter_dict['save_number'] += 1
+        self.block.update_value(record.line_number, value)
+
+    def read_record(self, record_line_number, counter_dict):
         if self.block is None or not self.block.if_line_buffered(record_line_number):
             page_number = int(record_line_number / self.BLOCK_SIZE_IN_LINES)
-            self.read_block(page_number)
-        if self.read_successful:
+            saved = self.read_block(page_number)
+            counter_dict['read_number'] += 1
+            if saved:
+                counter_dict['save_number'] += 1
+        if self.read_successful or len(self.block) > 0:
             record = self.block.find_in_line(record_line_number)
         else:
             record = None
         return record
 
-    def print_all(self):
+    def print_all(self, counter_dict):
         print("Line Key  Value Pointer  RemoveFlag")
         line_number = 0
         while True:
             if self.block is None or not self.block.if_line_buffered(line_number):
                 page_number = int(line_number / self.BLOCK_SIZE_IN_LINES)
-                self.read_block(page_number)
+                saved = self.read_block(page_number)
+                counter_dict['read_number'] += 1
+                if saved:
+                    counter_dict['save_number'] += 1
 
             if not self.block.if_line_buffered(line_number):
                 break

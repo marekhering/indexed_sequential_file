@@ -14,3 +14,11 @@ class Index:
 
     def to_string(self):
         return self.key + ' ' + '0' * (PAGE_NUMBER_SIZE - len(str(self.page_number))) + str(self.page_number) + '\n'
+
+    @staticmethod
+    def from_string(line):
+        words = line.split(' ')
+        key = words[0]
+        page_number = int(words[1])
+        index = Index(key, page_number)
+        return index

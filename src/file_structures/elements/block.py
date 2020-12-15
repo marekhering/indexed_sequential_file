@@ -1,4 +1,5 @@
 from .record import Record
+from .index import Index
 from src.algorithms import bisection
 from src.setup import *
 
@@ -95,5 +96,22 @@ class Block(list):
                 record = Record.from_string(line, line_number=(first_line_number + i))
 
             block.append(record)
+        block.change_flag = 0
+        return block
+
+    @staticmethod
+    def from_string_index(block_as_string, block_size, first_line_number, blank_line):
+        lines_as_string = block_as_string.split('\n')
+        block = Block(first_line_number, block_size)
+        for i, line in enumerate(lines_as_string):
+            if not line:
+                break
+
+            if line == blank_line:
+                index = None
+            else:
+                index = Index.from_string(line)
+
+            block.append(index)
         block.change_flag = 0
         return block

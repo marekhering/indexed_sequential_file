@@ -64,6 +64,8 @@ class Interface:
         print("Read record")
         key = self.insert_key()
         if key is None:
+            print("Wrong input")
+            print()
             return
         record, counter_dict = self.app_core.read_record(key)
         if record:
@@ -81,14 +83,13 @@ class Interface:
         key = self.insert_key()
         value = self.insert_value()
         if key is None or value is None:
+            print("Wrong input")
+            print()
             return
         record = Record(key, value)
         result, counter_dict = self.app_core.write_record(record)
-        if result:
-            print("Record inserted")
-        else:
+        if not result:
             print("Record already exist")
-        print()
         print()
         print("Number of reads", counter_dict['read_number'])
         print("Number of saves", counter_dict['save_number'], '\n')
@@ -98,6 +99,8 @@ class Interface:
         print("Remove record")
         key = self.insert_key()
         if key is None:
+            print("Wrong input")
+            print()
             return
         result, counter_dict = self.app_core.remove_record(key)
         if result:
@@ -114,6 +117,8 @@ class Interface:
         key = self.insert_key()
         new_value = self.insert_value()
         if key is None or new_value is None:
+            print("Wrong input")
+            print()
             return
         result, counter_dict = self.app_core.update_record(key, new_value)
         if result:
@@ -121,14 +126,13 @@ class Interface:
         else:
             print("No record with given key")
         print()
-        print()
         print("Number of reads", counter_dict['read_number'])
         print("Number of saves", counter_dict['save_number'], '\n')
         self.add_to_counter(counter_dict)
 
     def browse(self):
         print("Browse option: ")
-        print("1. Print records in files")
+        print("1. Print records in areas")
         print("2. Print records as chain")
         print("Enter browse option: ", end='')
         option = input()
@@ -165,8 +169,11 @@ class Interface:
                 if not line:
                     break
                 counter_dict = 0
-                words = line[:-1].split(" ")
+                if line[-1] == '\n':
+                    line = line[:-1]
+                words = line.split(" ")
                 instruction = words[0]
+
                 if instruction == 'R':
                     key = Record.fill_with(words[1], '0', KEY_SIZE)
                     print("Read record with key " + key + " -> ", end='')
@@ -182,10 +189,30 @@ class Interface:
                     print("Write record with key " + key + " and value " + str(value) + " -> ", end='')
                     record = Record(key, value)
                     result, counter_dict = self.app_core.write_record(record)
-                    if result:
-                        print("Record inserted")
-                    else:
+                    if not result:
                         print("Record already exist")
+
+                if instruction == 'O':
+                    counter_dict = self.app_core.reorganize()
+                    print("Force reorganization")
+
+                if instruction == 'U':
+                    key = Record.fill_with(words[1], '0', KEY_SIZE)
+                    value = float(words[2]) if '.' in words[2] else int(words[2])
+                    print("Update record with key " + key + "for new value" + str(value) + " -> ", end='')
+                    result, counter_dict = self.app_core.update_record(key, value)
+                    if result:
+                        print("Record updated")
+                    else:
+                        print("No record with given key")
+                if instruction == 'D':
+                    key = Record.fill_with(words[1], '0', KEY_SIZE)
+                    print("Remove record with key " + key + " -> ", end='')
+                    result, counter_dict = self.app_core.remove_record(key)
+                    if result:
+                        print("Record removed")
+                    else:
+                        print("No record with given key")
 
                 if counter_dict is not None:
                     test_counter_dict['read_number'] += counter_dict['read_number']
@@ -203,14 +230,10 @@ class Interface:
         print("Enter record key: ", end='')
         key = input()
         if len(key) > KEY_SIZE:
-            print("Wrong input")
-            print()
             return None
         try:
             key_as_int = int(key)
         except(ValueError, TypeError):
-            print("Wrong input")
-            print()
             return None
         key = Record.fill_with(key, '0', KEY_SIZE)
         return key
@@ -220,14 +243,12 @@ class Interface:
         print("Enter record value: ", end='')
         value = input()
         if len(value) > RECORD_SIZE:
-            print("Wrong input")
-            print()
+
             return None
         try:
             numerical_value = float(value) if '.' in value else int(value)
         except(ValueError, TypeError):
-            print("Wrong input")
-            print()
+
             return None
 
         return numerical_value

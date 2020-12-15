@@ -29,4 +29,5 @@ class FileClass:
             file.seek(offset)
             block_as_string = self.block.to_string(self.BLANK_LINE)
             file.write(block_as_string)
+
         return True

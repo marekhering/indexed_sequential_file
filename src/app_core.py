@@ -53,8 +53,12 @@ class AppCore:
             self.primary_area.save_block()
 
         if self.overflow_area.size_in_lines > self.primary_area.size_in_lines * AUTO_REORGANIZATION:
-            print("--Auto reorganization--", end=' ')
-            self.reorganize()
+            print(" --Auto reorganization-- ", end='')
+            reorganize_dict = self.reorganize()
+            counter_dict['read_number'] += reorganize_dict['read_number']
+            counter_dict['save_number'] += reorganize_dict['save_number']
+        place_name = "Primary Area" if next_record_place == self.primary_area else "Overflow Area"
+        print("Record inserted in", new_record.get_line_number(), "line of", place_name)
 
         return True, counter_dict
 
@@ -87,8 +91,6 @@ class AppCore:
             'read_number': 0,
             'save_number': 0
         }
-        if self.index_file.save_block():
-            counter_dict['save_number'] += 1
         if self.primary_area.save_block():
             counter_dict['save_number'] += 1
         if self.overflow_area.save_block():
@@ -232,23 +234,31 @@ class AppCore:
         number_of_records_in_block = 1
         number_of_empty_records_in_block = 0
         record_jump = 1 + round((number_of_empty_records - number_of_empty_records_in_block) /
-                                (number_of_records - number_of_records_in_block) + 000.1)
+                                ((number_of_records - number_of_records_in_block) + 000.1))
 
         while run:
             record_jump -= 1
 
             next_record = None
             if counter == 0 or record_jump == 0:
-                record_jump = 1 + round((number_of_empty_records - number_of_empty_records_in_block) /
-                                        ((number_of_records - number_of_records_in_block) + 000.1))
                 next_record, found_in_primary, jump = self.find_next_record(start_record, base_primary_line, counter_dict)
-                if found_in_primary:
-                    base_primary_line += jump
 
                 if next_record is None:
                     run = False
-                else:
+
+                if run:
+                    if found_in_primary:
+                        base_primary_line += jump
+
                     start_record = next_record.copy()
+
+                    if next_record.remove_flag == 1:
+                        record_jump = 1
+                        continue
+
+                    record_jump = 1 + round((number_of_empty_records - number_of_empty_records_in_block) /
+                                            ((number_of_records - number_of_records_in_block) + 000.1))
+
                     if counter == 0:
                         new_index = Index(next_record.get_key(), page_number)
                         reorganize_index_block.append(new_index)
@@ -258,7 +268,7 @@ class AppCore:
             else:
                 number_of_empty_records_in_block += 1
 
-            if run and (next_record is None or next_record.remove_flag == 0):
+            if run:
                 reorganize_primary_block.append(next_record)
                 counter += 1
 
